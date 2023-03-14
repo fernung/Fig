@@ -10,7 +10,7 @@ namespace Fig.Encoders
 
         public void Encode(string filename, Canvas canvas)
         {
-            using var stream = new FileStream(filename, FileMode.Create, FileAccess.Write);
+            using var stream = new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
             using var writer = new BinaryWriter(stream);
 
             // Calculate row length and padding length

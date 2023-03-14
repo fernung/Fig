@@ -326,6 +326,7 @@ namespace Fig
             DrawCanvas(canvas, x, y, Color.White);
         public void DrawCanvas(Canvas canvas, int x, int y, Color color)
         {
+            Color c;
             int canvasX, canvasY;
             int xEnd = Math.Min(x + canvas.Width, _canvas.Width);
             int yEnd = Math.Min(y + canvas.Height, _canvas.Height);
@@ -335,7 +336,8 @@ namespace Fig
                 for (int j = x; j < xEnd; j++)
                 {
                     canvasX = j - x;
-                    _canvas[j, i] = (canvas[canvasX, canvasY].UBGRA & color.UBGRA);
+                    c = (canvas[canvasX, canvasY].UBGRA & color.UBGRA);
+                    _canvas[j, i] = (c.A == byte.MaxValue) ? c : BlendColors(_canvas[j, i], c);
                 }
             }
         }
@@ -343,6 +345,7 @@ namespace Fig
             DrawCanvas(canvas, x, y, width, height, Color.White);
         public void DrawCanvas(Canvas canvas, int x, int y, int width, int height, Color color)
         {
+            Color c;
             float uStep = (float)(canvas.Width - 1)/ width;
             float vStep = (float)(canvas.Height- 1) / height;
 
@@ -362,15 +365,15 @@ namespace Fig
                     int canvasX1 = (int)u;
                     int canvasX2 = Math.Min(canvasX1 + 1, canvas.Width - 1);
                     float uLerp = u - canvasX1;
-
-                    _canvas[j, i] = (Color.Interpolate
+                    c = (Color.Interpolate
                     (
-                        canvas[canvasX1, canvasY1], 
-                        canvas[canvasX2, canvasY1], 
-                        canvas[canvasX1, canvasY2], 
-                        canvas[canvasX2, canvasY2], 
+                        canvas[canvasX1, canvasY1],
+                        canvas[canvasX2, canvasY1],
+                        canvas[canvasX1, canvasY2],
+                        canvas[canvasX2, canvasY2],
                         uLerp, vLerp
                     ).UBGRA & color.UBGRA);
+                    _canvas[j, i] = (c.A == byte.MaxValue) ? c : BlendColors(_canvas[j, i], c);
                 }
             }
         }
@@ -378,6 +381,7 @@ namespace Fig
             DrawCanvas(canvas, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH, Color.White);
         public void DrawCanvas(Canvas canvas, int srcX, int srcY, int srcW, int srcH, int dstX, int dstY, int dstW, int dstH, Color color)
         {
+            Color c;
             int canvasX, canvasY;
             float uStep = (float)srcW / dstW;
             float vStep = (float)srcH / dstH;
@@ -400,14 +404,20 @@ namespace Fig
                     // Use nearest neighbor interpolation
                     canvasX = (uLerp < 0.5f) ? canvasX1 : canvasX1 + 1;
                     canvasY = (vLerp < 0.5f) ? canvasY1 : canvasY1 + 1;
-
-                    _canvas[j, i] = (canvas[canvasX, canvasY].UBGRA & color.UBGRA);
+                    c = (canvas[canvasX, canvasY].UBGRA & color.UBGRA);
+                    _canvas[j, i] = (c.A == byte.MaxValue) ? c : BlendColors(_canvas[j, i], c);
                 }
             }
         }
 
         public void FillTriangle(int x0, int y0, int x1, int y1, int x2, int y2, Color color)
         {
+            if (color.A != byte.MaxValue)
+            {
+                BlendTriangle(x0, y0, x1, y1, x2, y2, color);
+                return;
+            }
+
             var minX = Math.Min(x0, Math.Min(x1, x2));
             var minY = Math.Min(y0, Math.Min(y1, y2));
             var maxX = Math.Max(x0, Math.Max(x1, x2));
@@ -420,8 +430,42 @@ namespace Fig
                     _canvas[x, y] = color;
                 }
         }
+        public void FillTriangle(int x0, int y0, int x1, int y1, int x2, int y2, Color c0, Color c1, Color c2)
+        {
+            var minX = Math.Min(x0, Math.Min(x1, x2));
+            var minY = Math.Min(y0, Math.Min(y1, y2));
+            var maxX = Math.Max(x0, Math.Max(x1, x2));
+            var maxY = Math.Max(y0, Math.Max(y1, y2));
+
+            float denom = ((y1 - y2) * (x0 - x2) + (x2 - x1) * (y0 - y2));
+            if (denom == 0) denom = 1;
+
+            for (var y = minY; y <= maxY; y++)
+            {
+                for (var x = minX; x <= maxX; x++)
+                {
+                    float w0 = ((y1 - y2) * (x - x2) + (x2 - x1) * (y - y2)) / denom;
+                    float w1 = ((y2 - y0) * (x - x2) + (x0 - x2) * (y - y2)) / denom;
+                    float w2 = 1f - w0 - w1;
+
+                    if (w0 >= 0f && w1 >= 0f && w2 >= 0f)
+                    {
+                        Color interpolatedColor = Color.Interpolate(c0, c1, c2, w0, w1, w2);
+                        _canvas[x, y] = interpolatedColor.A == byte.MaxValue ? 
+                                        interpolatedColor : 
+                                        BlendColors(_canvas[x, y], interpolatedColor);
+                    }
+                }
+            }
+        }
         public void FillRectangle(int x0, int y0, int x1, int y1, Color color)
         {
+            if (color.A != byte.MaxValue)
+            {
+                BlendRectangle(x0, y0, x1, y1, color);
+                return;
+            }
+
             var minX = Math.Min(x0, x1);
             var minY = Math.Min(y0, y1);
             var maxX = Math.Max(x0, x1);
@@ -432,11 +476,50 @@ namespace Fig
         }
         public void FillCircle(int x, int y, int radius, Color color)
         {
+            if (color.A != byte.MaxValue)
+            {
+                BlendCircle(x, y, radius, color);
+                return;
+            }
+
             var r2 = radius * radius;
             for (var ys = -radius; ys <= radius; ys++)
                 for (var xs = -radius; xs <= radius; xs++)
                     if (xs * xs + ys * ys <= r2)
                         _canvas[x + xs, y + ys] = color;
+        }
+
+        public void BlendTriangle(int x0, int y0, int x1, int y1, int x2, int y2, Color color)
+        {
+            var minX = Math.Min(x0, Math.Min(x1, x2));
+            var minY = Math.Min(y0, Math.Min(y1, y2));
+            var maxX = Math.Max(x0, Math.Max(x1, x2));
+            var maxY = Math.Max(y0, Math.Max(y1, y2));
+            for (var y = minY; y <= maxY; y++)
+                for (var x = minX; x <= maxX; x++)
+                {
+                    if (!IsInsideTriangle(x, y, x0, y0, x1, y1, x2, y2))
+                        continue;
+                    _canvas[x, y] = BlendColors(_canvas[x, y], color);
+                }
+        }
+        public void BlendRectangle(int x0, int y0, int x1, int y1, Color color)
+        {
+            var minX = Math.Min(x0, x1);
+            var minY = Math.Min(y0, y1);
+            var maxX = Math.Max(x0, x1);
+            var maxY = Math.Max(y0, y1);
+            for (var y = minY; y <= maxY; y++)
+                for (var x = minX; x <= maxX; x++)
+                    _canvas[x, y] = BlendColors(_canvas[x, y], color);
+        }
+        public void BlendCircle(int x, int y, int radius, Color color)
+        {
+            var r2 = radius * radius;
+            for (var ys = -radius; ys <= radius; ys++)
+                for (var xs = -radius; xs <= radius; xs++)
+                    if (xs * xs + ys * ys <= r2)
+                        _canvas[x + xs, y + ys] = BlendColors(_canvas[x + xs, y + ys], color);
         }
 
         private static bool IsInsideTriangle(int pX, int pY, int x0, int y0, int x1, int y1, int x2, int y2)
@@ -451,6 +534,21 @@ namespace Fig
                        w1_denom;
             float w2 = 1 - w0 - w1;
             return w0 >= 0 && w1 >= 0 && w2 >= 0;
+        }
+        private static Color BlendColors(Color dst, Color src)
+        {
+            float srcA = src.Af;
+            float dstA = dst.Af;
+            float outA = srcA + dstA * (1.0f - srcA);
+
+            if (outA == 0)
+                return new Color(0, 0, 0, 0);
+
+            float outR = (src.Rf * srcA + dst.Rf * dstA * (1 - srcA)) / outA;
+            float outG = (src.Gf * srcA + dst.Gf * dstA * (1 - srcA)) / outA;
+            float outB = (src.Bf * srcA + dst.Bf * dstA * (1 - srcA)) / outA;
+
+            return new Color(outB, outG, outR, outA);
         }
     }
 }

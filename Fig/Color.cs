@@ -87,6 +87,19 @@ namespace Fig
             a + (b - a) * t;
         private static float Interpolate(float a, float b, float c, float d, float x, float y) =>
             Interpolate(Interpolate(a, c, x), Interpolate(b, d, x), y);
+        public static Color Interpolate(Color c0, Color c1, Color c2, float w0, float w1, float w2)
+        {
+            var b = InterpolateBarycentric(c0.Bf, c1.Bf, c2.Bf, w0, w1, w2);
+            var g = InterpolateBarycentric(c0.Gf, c1.Gf, c2.Gf, w0, w1, w2);
+            var r = InterpolateBarycentric(c0.Rf, c1.Rf, c2.Rf, w0, w1, w2);
+            var a = InterpolateBarycentric(c0.Af, c1.Af, c2.Af, w0, w1, w2);
+            return new(b, g, r, a);
+        }
+
+        private static float InterpolateBarycentric(float a, float b, float c, float w0, float w1, float w2)
+        {
+            return (a * w0) + (b * w1) + (c * w2);
+        }
 
         public static implicit operator Color(int value) => new Color(value);
         public static implicit operator Color(uint value) => new Color(value);
@@ -104,7 +117,14 @@ namespace Fig
         }
         public static Color operator *(float multiplier, Color color) =>
             color * multiplier;
-
+        public static Color operator +(Color a, Color b) =>
+            new
+            (
+                (byte)Math.Min(a.R + b.R, 255),
+                (byte)Math.Min(a.G + b.G, 255),
+                (byte)Math.Min(a.B + b.B, 255),
+                (byte)Math.Min(a.A + b.A, 255)
+            );
 
         public static readonly Color Transparent = new();
         public static readonly Color White = new(0xFFFFFFFF);
