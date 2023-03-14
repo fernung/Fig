@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Fig.Decoders;
+using Fig.Encoders;
+using System;
 
 namespace Fig
 {
@@ -150,6 +152,11 @@ namespace Fig
         {
             _canvas = canvas;
         }
+
+        public void Save(string path, IEncoder encoder) =>
+            encoder.Encode(path, _canvas);
+        public void Load(string path, IDecoder decoder) =>
+            decoder.Decode(path, out _canvas);
 
         public void Clear() =>
             Fill(Color.Transparent);
@@ -524,14 +531,10 @@ namespace Fig
 
         private static bool IsInsideTriangle(int pX, int pY, int x0, int y0, int x1, int y1, int x2, int y2)
         {
-            float w0_denom = ((y1 - y2) * (x0 - x2) + (x2 - x1) * (y0 - y2));
-            float w1_denom = ((y1 - y2) * (x0 - x2) + (x2 - x1) * (y0 - y2));
-            if (w0_denom == 0) w0_denom = 1;
-            if (w1_denom == 0) w1_denom = 1;
-            float w0 = ((y1 - y2) * (pX - x2) + (x2 - x1) * (pY - y2)) /
-                       w0_denom;
-            float w1 = ((y2 - y0) * (pX - x2) + (x0 - x2) * (pY - y2)) /
-                       w1_denom;
+            float denom = ((y1 - y2) * (x0 - x2) + (x2 - x1) * (y0 - y2));
+            if (denom == 0) denom = 1;
+            float w0 = ((y1 - y2) * (pX - x2) + (x2 - x1) * (pY - y2)) / denom;
+            float w1 = ((y2 - y0) * (pX - x2) + (x0 - x2) * (pY - y2)) / denom;
             float w2 = 1 - w0 - w1;
             return w0 >= 0 && w1 >= 0 && w2 >= 0;
         }

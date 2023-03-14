@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace Fig.Decoders
@@ -7,6 +8,8 @@ namespace Fig.Decoders
     {
         public Canvas Decode(string filename)
         {
+            if (!Path.HasExtension(filename))
+                filename = $"{filename}.png";
             using var bitmap = System.Drawing.Image.FromFile(filename) as System.Drawing.Bitmap;
             var rect = new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height);
             var data = bitmap.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);

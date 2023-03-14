@@ -10,6 +10,9 @@ namespace Fig.Encoders
 
         public void Encode(string filename, Canvas canvas)
         {
+            if (!Path.HasExtension(filename) || 
+                 Path.GetExtension(filename).ToLower() != "bmp")
+                filename = $"{filename}.bmp";
             using var stream = new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
             using var writer = new BinaryWriter(stream);
 

@@ -6,6 +6,9 @@ namespace Fig.Encoders
     {
         public void Encode(string filename, Canvas canvas)
         {
+            if (!Path.HasExtension(filename) ||
+                 Path.GetExtension(filename).ToLower() != "ppm")
+                filename = $"{filename}.ppm";
             using var stream = File.OpenWrite(filename);
             using var writer = new StreamWriter(stream);
 

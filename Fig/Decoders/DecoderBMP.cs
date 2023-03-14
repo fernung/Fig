@@ -11,6 +11,9 @@ namespace Fig.Decoders
 
         public Canvas Decode(string filename)
         {
+            if (!Path.HasExtension(filename) ||
+                 Path.GetExtension(filename).ToLower() != "bmp")
+                filename = $"{filename}.bmp";
             using var stream = new FileStream(filename, FileMode.Open, FileAccess.Read);
             using var reader = new BinaryReader(stream);
 

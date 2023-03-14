@@ -7,6 +7,9 @@ namespace Fig.Decoders
     {
         public Canvas Decode(string filename)
         {
+            if (!Path.HasExtension(filename) ||
+                 Path.GetExtension(filename).ToLower() != "ppm")
+                filename = $"{filename}.ppm";
             using var stream = File.OpenRead(filename);
             using var reader = new StreamReader(stream);
 

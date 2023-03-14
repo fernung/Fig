@@ -36,19 +36,18 @@ namespace Fig.Runner
             graphics.Fill(colorBg);
             graphics.DrawTriangle(x0, y0, x1, y1, x2, y2, colorFg);
             graphics.DrawText($"Triangle[({x0}, {y0}) -> ({x1}, {y1}) -> ({x2}, {y2})]", 0, 0, 16, Color.Black);
-            encoder.Encode($"{_dir}\\triangle_draw.bmp", canvas);
+            graphics.Save($"{_dir}\\triangle_draw", encoder);
 
             graphics.Fill(colorBg);
             graphics.FillTriangle(x0, y0, x1, y1, x2, y2, colorFg);
             graphics.DrawText($"Triangle[({x0}, {y0}) -> ({x1}, {y1}) -> ({x2}, {y2})]", 0, 0, 16, Color.Black);
-            encoder.Encode($"{_dir}\\triangle_fill.bmp", canvas);
+            graphics.Save($"{_dir}\\triangle_fill", encoder);
 
             graphics.Fill(colorBg);
             graphics.FillRectangle(200, 150, 600, 450, colorFg);
             graphics.FillTriangle(100, 350, 400, 50, 700, 350, Color.Red, Color.Green, 0x7F0000FF);
             graphics.DrawText($"Triangle[({x0}, {y0}) -> ({x1}, {y1}) -> ({x2}, {y2})]", 0, 0, 16, Color.Black);
-            encoder.Encode($"{_dir}\\triangle_rgb.bmp", canvas);
-
+            graphics.Save($"{_dir}\\triangle_rgb", encoder);
         }
         static void DrawRectangle()
         {
@@ -61,12 +60,12 @@ namespace Fig.Runner
             graphics.Fill(colorBg);
             graphics.DrawRectangle(x0, y0, x1, y1, colorFg);
             graphics.DrawText($"Rectangle[({x0}, {y0}) -> ({x1}, {y1})]", 0, 0, 16, Color.Black);
-            encoder.Encode($"{_dir}\\rectangle_draw.bmp", canvas);
+            graphics.Save($"{_dir}\\rectangle_draw", encoder);
 
             graphics.Fill(colorBg);
             graphics.FillRectangle(x0, y0, x1, y1, colorFg);
             graphics.DrawText($"Rectangle[({x0}, {y0}) -> ({x1}, {y1})]", 0, 0, 16, Color.Black);
-            encoder.Encode($"{_dir}\\rectangle_fill.bmp", canvas);
+            graphics.Save($"{_dir}\\rectangle_fill", encoder);
         }
         static void DrawCircle()
         {
@@ -78,12 +77,12 @@ namespace Fig.Runner
             graphics.Fill(colorBg);
             graphics.DrawCircle(x0, y0, radius, colorFg);
             graphics.DrawText($"Circle[({x0}, {y0}), r: {radius}]", 0, 0, 16, Color.Black);
-            encoder.Encode($"{_dir}\\circle_draw.bmp", canvas);
+            graphics.Save($"{_dir}\\circle_draw", encoder);
 
             graphics.Fill(colorBg);
             graphics.FillCircle(x0, y0, radius, colorFg);
             graphics.DrawText($"Circle[({x0}, {y0}), r: {radius}]", 0, 0, 16, Color.Black);
-            encoder.Encode($"{_dir}\\circle_fill.bmp", canvas);
+            graphics.Save($"{_dir}\\circle_fill", encoder);
         }
         static void DrawText()
         {
@@ -93,7 +92,7 @@ namespace Fig.Runner
             graphics.FillRectangle(200, 150, 600, 450, colorFg);
             graphics.DrawText("The quick brown fox jumped swiftly over the lazy dog.", 0, 0, 16, Color.Black);
             graphics.DrawText("THE QUICK BROWN FOX JUMPED SWIFTLY OVER THE LAZY DOG.", 0, 20, 16, Color.Black);
-            encoder.Encode($"{_dir}\\text.bmp", canvas);
+            graphics.Save($"{_dir}\\text", encoder);
         }
         static void DrawCanvas()
         {
@@ -101,35 +100,35 @@ namespace Fig.Runner
             var h = canvas.Height >> 1;
             Canvas c;
             graphics.Clear();
-            decoder.Decode($"{_dir}\\triangle_fill.bmp", out c);
+            decoder.Decode($"{_dir}\\triangle_fill", out c);
             graphics.DrawCanvas(c, 0, 0, w, h);
-            decoder.Decode($"{_dir}\\rectangle_fill.bmp", out c);
+            decoder.Decode($"{_dir}\\rectangle_fill", out c);
             graphics.DrawCanvas(c, 400, 0, w, h);
-            decoder.Decode($"{_dir}\\circle_fill.bmp", out c);
+            decoder.Decode($"{_dir}\\circle_fill", out c);
             graphics.DrawCanvas(c, 0, 300, w, h);
-            decoder.Decode($"{_dir}\\text.bmp", out c);
+            decoder.Decode($"{_dir}\\text", out c);
             graphics.DrawCanvas(c, 400, 300, w, h);
-            encoder.Encode($"{_dir}\\canvas.bmp", canvas);
+            graphics.Save($"{_dir}\\canvas", encoder);
 
-            decoder.Decode($"{_dir}\\canvas.bmp", out c);
+            decoder.Decode($"{_dir}\\canvas", out c);
             graphics.Clear();
             graphics.DrawCanvas(c, 200, 150, 400, 300, 0, 0, canvas.Width, canvas.Height);
-            encoder.Encode($"{_dir}\\canvas2.bmp", canvas);
+            graphics.Save($"{_dir}\\canvas2", encoder);
         }
         static void DrawTint()
         {
             graphics.Fill(Color.Black);
             graphics.FillRectangle(200, 150, 600, 450, Color.White);
-            encoder.Encode($"{_dir}\\tint.bmp", canvas);
+            graphics.Save($"{_dir}\\tint", encoder);
 
             var w = canvas.Width >> 1;
             var h = canvas.Height >> 1;
-            decoder.Decode($"{_dir}\\tint.bmp", out var c);
+            decoder.Decode($"{_dir}\\tint", out var c);
             graphics.DrawCanvas(c, 0, 0, w, h, Color.White);
             graphics.DrawCanvas(c, w, 0, w, h, Color.Red);
             graphics.DrawCanvas(c, 0, h, w, h, Color.Green);
             graphics.DrawCanvas(c, w, h, w, h, Color.Blue);
-            encoder.Encode($"{_dir}\\tint.bmp", canvas);
+            graphics.Save($"{_dir}\\tint", encoder);
         }
         static void DrawAlpha()
         {
@@ -137,8 +136,8 @@ namespace Fig.Runner
             graphics.FillCircle(400, 300, 300, Color.Red);
             graphics.FillRectangle(0, 0, 400, 300, 0x7F0000FF);
             graphics.FillTriangle(200, 150, 800, 0, 800, 600, 0x4400FF00);
-            encoder.Encode($"{_dir}\\alpha.bmp", canvas);
-            decoder.Decode($"{_dir}\\alpha.bmp", out var c);
+            graphics.Save($"{_dir}\\alpha", encoder);
+            decoder.Decode($"{_dir}\\alpha", out var c);
 
             var w = (canvas.Width >> 1) + 10;
             var h = (canvas.Height >> 1) + 10;
@@ -147,7 +146,7 @@ namespace Fig.Runner
             graphics.DrawCanvas(c, w-20, 0, w, h, 0x7FFFFFFF);
             graphics.DrawCanvas(c, 0, h-20, w, h);
             graphics.DrawCanvas(c, w - 20, h - 20, w, h, 0x7FFFFFFF);
-            encoder.Encode($"{_dir}\\alpha.bmp", canvas);
+            graphics.Save($"{_dir}\\alpha", encoder);
         }
     }
 }

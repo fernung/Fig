@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace Fig.Encoders
@@ -7,6 +8,8 @@ namespace Fig.Encoders
     {
         public void Encode(string filename, Canvas canvas)
         {
+            if (!Path.HasExtension(filename))
+                filename = $"{filename}.png";
             var pixels = new Color[canvas.Length];
             canvas.Pixels.CopyTo(pixels.AsSpan());
             var handle = GCHandle.Alloc(pixels, GCHandleType.Pinned);
