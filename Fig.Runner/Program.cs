@@ -1,4 +1,5 @@
 ﻿using Fig.Graphics;
+using Fig.Graphics.Commands;
 using Fig.Graphics.Decoders;
 using Fig.Graphics.Encoders;
 
@@ -15,6 +16,7 @@ namespace Fig.Runner
 
         static void Main(string[] args)
         {
+            ClearExamples();
             DrawTriangle();
             DrawRectangle();
             DrawCircle();
@@ -22,8 +24,15 @@ namespace Fig.Runner
             DrawCanvas();
             DrawTint();
             DrawAlpha();
+            DrawCommands();
         }
 
+        static void ClearExamples()
+        {
+            var files = Directory.GetFiles(_dir);
+            foreach (var file in files)
+                File.Delete(file);
+        }
         static void DrawTriangle()
         {
             var colorBg = random.NextColor();
@@ -148,6 +157,59 @@ namespace Fig.Runner
             graphics.DrawCanvas(c, 0, h-20, w, h);
             graphics.DrawCanvas(c, w - 20, h - 20, w, h, 0x7FFFFFFF);
             graphics.Save($"{_dir}\\alpha", encoder);
+        }
+        static void DrawCommands()
+        {
+            Color colorBg, colorFg;
+            int x0, y0, x1, y1, x2, y2;
+            colorBg = random.NextColor();
+            graphics.Queue(new FillCommand(colorBg));
+
+            x0 = random.Next(0, canvas.Width);
+            y0 = random.Next(0, canvas.Height);
+            x1 = random.Next(0, canvas.Width >> 1);
+            colorFg = random.NextColor();
+            graphics.Queue(new CircleCommand(x0, y0, x1, colorFg, true));
+
+            x0 = random.Next(0, canvas.Width);
+            y0 = random.Next(0, canvas.Height);
+            x1 = random.Next(0, canvas.Width);
+            y1 = random.Next(0, canvas.Height);
+            colorFg = random.NextColor();
+            graphics.Queue(new RectangleCommand(x0, y0, Math.Abs(x1 - x0), Math.Abs(y1 - y0), colorFg, true));
+
+            x0 = random.Next(0, canvas.Width);
+            y0 = random.Next(0, canvas.Height);
+            x1 = random.Next(0, canvas.Width);
+            y1 = random.Next(0, canvas.Height);
+            x2 = random.Next(0, canvas.Width);
+            y2 = random.Next(0, canvas.Height);
+            colorFg = random.NextColorA();
+            graphics.Queue(new TriangleCommand(x0, y0, x1, y1, x2, y2, colorFg, true));
+
+            colorFg = random.NextColor();
+            x0 = random.Next(0, canvas.Width);
+            y0 = random.Next(0, canvas.Height);
+            x1 = random.Next(0, canvas.Width);
+            y1 = random.Next(0, canvas.Height);
+            x2 = random.Next(0, canvas.Width);
+            y2 = random.Next(0, canvas.Height);
+            graphics.Queue(new TriangleCommand(x0, y0, x1, y1, x2, y2, random.NextColorA(), random.NextColorA(), random.NextColorA()));
+
+            x0 = random.Next(0, canvas.Width);
+            y0 = random.Next(0, canvas.Height);
+            x1 = random.Next(0, canvas.Width);
+            y1 = random.Next(0, canvas.Height);
+            colorFg = random.NextColor();
+            graphics.Queue(new LineCommand(x0, y0, x1, y1, colorFg));
+
+            x0 = random.Next(0, canvas.Width);
+            y0 = random.Next(0, canvas.Height);
+            colorFg = random.NextColor();
+            graphics.Queue(new PixelCommand(x0, y0, colorFg));
+
+            graphics.Process();
+            graphics.Save($"{_dir}\\commands", encoder);
         }
     }
 }
