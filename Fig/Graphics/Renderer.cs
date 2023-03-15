@@ -1,6 +1,8 @@
-﻿using Fig.Graphics.Decoders;
+﻿using Fig.Graphics.Commands;
+using Fig.Graphics.Decoders;
 using Fig.Graphics.Encoders;
 using System;
+using System.Collections.Generic;
 
 namespace Fig.Graphics
 {
@@ -11,6 +13,7 @@ namespace Fig.Graphics
         private SamplerFunction _samplerFunction;
         private BlendState _blendState;
         private BlendFunction _blendFunction;
+        private HashSet<DrawCommand> _commands;
 
         public Canvas Canvas
         {
@@ -25,9 +28,9 @@ namespace Fig.Graphics
                 _samplerState = value;
                 _samplerFunction = _samplerState switch
                 {
-                    SamplerState.Bilinear => BilinearInterpolation,
-                    SamplerState.NearestNeighbor => NearestNeighborInterpolation,
-                    _ => NearestNeighborInterpolation
+                    SamplerState.Bilinear => BilinearSampler,
+                    SamplerState.NearestNeighbor => NearestNeighborSampler,
+                    _ => NearestNeighborSampler
                 };
             }
         }
@@ -54,9 +57,21 @@ namespace Fig.Graphics
         {
             _canvas = canvas;
             _samplerState = SamplerState.NearestNeighbor;
-            _samplerFunction = NearestNeighborInterpolation;
+            _samplerFunction = NearestNeighborSampler;
             _blendState = BlendState.Alpha;
             _blendFunction = BlendAlpha;
+            _commands = new();
+        }
+
+        public void Queue(DrawCommand command)
+        {
+            _commands.Add(command);
+        }
+        public void Process()
+        {
+            foreach (DrawCommand command in _commands)
+                command.Execute(this);
+            _commands.Clear();
         }
 
         public void DrawPixel(int x, int y, Color color) =>
@@ -378,11 +393,11 @@ namespace Fig.Graphics
             decoder.Decode(path, out _canvas);
 
         private delegate Color SamplerFunction(Canvas canvas, int x1, int y1, int x2, int y2, float u, float v);
-        private Color BilinearInterpolation(Canvas canvas, int x1, int y1, int x2, int y2, float u, float v)
+        private Color BilinearSampler(Canvas canvas, int x1, int y1, int x2, int y2, float u, float v)
         {
             return Color.Interpolate(canvas[x1, y1], canvas[x2, y1], canvas[x1, y2], canvas[x2, y2], u, v);
         }
-        private Color NearestNeighborInterpolation(Canvas canvas, int x1, int y1, int x2, int y2, float u, float v)
+        private Color NearestNeighborSampler(Canvas canvas, int x1, int y1, int x2, int y2, float u, float v)
         {
             int x = (u < 0.5f) ? x1 : x2;
             int y = (v < 0.5f) ? y1 : y2;
