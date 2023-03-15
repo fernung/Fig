@@ -1,5 +1,6 @@
-﻿using Fig.Decoders;
-using Fig.Encoders;
+﻿using Fig.Graphics;
+using Fig.Graphics.Decoders;
+using Fig.Graphics.Encoders;
 
 namespace Fig.Runner
 {
@@ -7,7 +8,7 @@ namespace Fig.Runner
     {
         private static readonly string _dir = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "Examples"));
         private static readonly Canvas canvas = new(800, 600);
-        private static readonly Graphics graphics = new(canvas);
+        private static readonly Renderer graphics = new(canvas);
         private static readonly IEncoder encoder = new EncoderBMP();
         private static readonly IDecoder decoder = new DecoderBMP();
         private static readonly Random random = new();
@@ -45,7 +46,7 @@ namespace Fig.Runner
 
             graphics.Fill(colorBg);
             graphics.FillRectangle(200, 150, 600, 450, colorFg);
-            graphics.FillTriangle(100, 350, 400, 50, 700, 350, Color.Red, Color.Green, 0x7F0000FF);
+            graphics.FillTriangle(x0, y0, x1, y1, x2, y2, Color.Red, Color.Green, 0x7F0000FF);
             graphics.DrawText($"Triangle[({x0}, {y0}) -> ({x1}, {y1}) -> ({x2}, {y2})]", 0, 0, 16, Color.Black);
             graphics.Save($"{_dir}\\triangle_rgb", encoder);
         }
@@ -99,7 +100,7 @@ namespace Fig.Runner
             var w = canvas.Width >> 1;
             var h = canvas.Height >> 1;
             Canvas c;
-            graphics.Clear();
+            graphics.Fill();
             decoder.Decode($"{_dir}\\triangle_fill", out c);
             graphics.DrawCanvas(c, 0, 0, w, h);
             decoder.Decode($"{_dir}\\rectangle_fill", out c);
@@ -111,7 +112,7 @@ namespace Fig.Runner
             graphics.Save($"{_dir}\\canvas", encoder);
 
             decoder.Decode($"{_dir}\\canvas", out c);
-            graphics.Clear();
+            graphics.Fill();
             graphics.DrawCanvas(c, 200, 150, 400, 300, 0, 0, canvas.Width, canvas.Height);
             graphics.Save($"{_dir}\\canvas2", encoder);
         }
@@ -141,7 +142,7 @@ namespace Fig.Runner
 
             var w = (canvas.Width >> 1) + 10;
             var h = (canvas.Height >> 1) + 10;
-            graphics.Clear();
+            graphics.Fill();
             graphics.DrawCanvas(c, 0, 0, w, h);
             graphics.DrawCanvas(c, w-20, 0, w, h, 0x7FFFFFFF);
             graphics.DrawCanvas(c, 0, h-20, w, h);

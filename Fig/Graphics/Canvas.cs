@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Fig
+namespace Fig.Graphics
 {
     public class Canvas
     {
@@ -50,7 +50,7 @@ namespace Fig
 
         public Color GetPixel(int index)
         {
-            if(InBounds(index, Length))
+            if (InBounds(index, Length))
                 return _pixels[index];
             return Color.Transparent;
         }
@@ -63,7 +63,7 @@ namespace Fig
 
         public void SetPixel(int index, Color color)
         {
-            if(InBounds(index, Length))
+            if (InBounds(index, Length))
                 _pixels[index] = color;
         }
         public void SetPixel(int x, int y, Color color)

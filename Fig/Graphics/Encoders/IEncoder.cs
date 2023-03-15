@@ -1,4 +1,6 @@
-﻿namespace Fig.Encoders
+﻿using Fig.Graphics;
+
+namespace Fig.Graphics.Encoders
 {
     public interface IEncoder
     {

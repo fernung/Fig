@@ -1,8 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using Fig.Graphics;
 
-namespace Fig.Encoders
+namespace Fig.Graphics.Encoders
 {
     public class EncoderGDI : IEncoder
     {

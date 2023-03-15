@@ -1,7 +1,8 @@
 ﻿using System;
 using System.IO;
+using Fig.Graphics;
 
-namespace Fig.Decoders
+namespace Fig.Graphics.Decoders
 {
     public class DecoderBMP : IDecoder
     {
@@ -34,7 +35,7 @@ namespace Fig.Decoders
             var canvas = new Canvas(width, height);
             var pixels = canvas.Pixels;
             var rowLength = (int)Math.Ceiling(width * bitsPerPixel / 8.0);
-            var paddingLength = (4 - (rowLength % 4)) % 4;
+            var paddingLength = (4 - rowLength % 4) % 4;
             var row = new byte[rowLength];
 
             for (var y = height - 1; y >= 0; y--)
@@ -48,7 +49,7 @@ namespace Fig.Decoders
                     var b = row[offset];
                     var g = row[offset + 1];
                     var r = row[offset + 2];
-                    var a = (bitsPerPixel == 24) ? byte.MaxValue : row[offset + 3];
+                    var a = bitsPerPixel == 24 ? byte.MaxValue : row[offset + 3];
 
                     pixels[y * width + x] = new Color(b, g, r, a);
                 }

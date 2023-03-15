@@ -1,7 +1,8 @@
 ﻿using System;
 using System.IO;
+using Fig.Graphics;
 
-namespace Fig.Encoders
+namespace Fig.Graphics.Encoders
 {
     public class EncoderBMP : IEncoder
     {
@@ -10,7 +11,7 @@ namespace Fig.Encoders
 
         public void Encode(string filename, Canvas canvas)
         {
-            if (!Path.HasExtension(filename) || 
+            if (!Path.HasExtension(filename) ||
                  Path.GetExtension(filename).ToLower() != "bmp")
                 filename = $"{filename}.bmp";
             using var stream = new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
@@ -21,7 +22,7 @@ namespace Fig.Encoders
             var height = canvas.Height;
             var bitsPerPixel = 32;
             var rowLength = width * bitsPerPixel / 8;
-            var paddingLength = (4 - (rowLength % 4)) % 4;
+            var paddingLength = (4 - rowLength % 4) % 4;
 
             // Write BMP header
             writer.Write((short)0x4D42);

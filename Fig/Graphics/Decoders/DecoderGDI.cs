@@ -1,8 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using Fig.Graphics;
 
-namespace Fig.Decoders
+namespace Fig.Graphics.Decoders
 {
     public class DecoderGDI : IDecoder
     {
@@ -13,7 +14,7 @@ namespace Fig.Decoders
             using var bitmap = System.Drawing.Image.FromFile(filename) as System.Drawing.Bitmap;
             var rect = new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height);
             var data = bitmap.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-            var bytes = new byte[(rect.Width * rect.Height) << 2];
+            var bytes = new byte[rect.Width * rect.Height << 2];
             Marshal.Copy(data.Scan0, bytes, 0, bytes.Length);
             bitmap.UnlockBits(data);
             bitmap.Dispose();

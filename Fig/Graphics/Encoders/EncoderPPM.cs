@@ -1,6 +1,7 @@
 ﻿using System.IO;
+using Fig.Graphics;
 
-namespace Fig.Encoders
+namespace Fig.Graphics.Encoders
 {
     public class EncoderPPM : IEncoder
     {

@@ -1,7 +1,8 @@
 ﻿using System;
 using System.IO;
+using Fig.Graphics;
 
-namespace Fig.Decoders
+namespace Fig.Graphics.Decoders
 {
     public class DecoderPPM : IDecoder
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace Fig
+namespace Fig.Graphics
 {
     [StructLayout(LayoutKind.Explicit)]
     public struct Color
@@ -78,15 +78,6 @@ namespace Fig
             var a = Interpolate(c0.Af, c1.Af, c2.Af, c3.Af, x, y);
             return new(b, g, r, a);
         }
-
-        private static float ToFloat(byte value) =>
-            value * (1f / 255f);
-        private static byte ToByte(float value) =>
-            (byte)(Math.Clamp(value, 0f, 1f) * 255f);
-        private static float Interpolate(float a, float b, float t) =>
-            a + (b - a) * t;
-        private static float Interpolate(float a, float b, float c, float d, float x, float y) =>
-            Interpolate(Interpolate(a, c, x), Interpolate(b, d, x), y);
         public static Color Interpolate(Color c0, Color c1, Color c2, float w0, float w1, float w2)
         {
             var b = InterpolateBarycentric(c0.Bf, c1.Bf, c2.Bf, w0, w1, w2);
@@ -96,9 +87,48 @@ namespace Fig
             return new(b, g, r, a);
         }
 
+        public static Color Blend(Color dst, Color src)
+        {
+            float srcA = src.Af;
+            float dstA = dst.Af;
+            float outA = srcA + dstA * (1.0f - srcA);
+
+            if (outA == 0)
+                return new Color(0, 0, 0, 0);
+
+            float outR = (src.Rf * srcA + dst.Rf * dstA * (1 - srcA)) / outA;
+            float outG = (src.Gf * srcA + dst.Gf * dstA * (1 - srcA)) / outA;
+            float outB = (src.Bf * srcA + dst.Bf * dstA * (1 - srcA)) / outA;
+
+            return new Color(outB, outG, outR, outA);
+        }
+        public static Color Add(Color a, Color b)
+        {
+            int red = a.R + b.R;
+            int green = a.G + b.G;
+            int blue = a.B + b.B;
+            int alpha = a.A + b.A;
+
+            return new
+            (
+                Math.Min(red, 255),
+                Math.Min(green, 255),
+                Math.Min(blue, 255),
+                Math.Min(alpha, 255)
+            );
+        }
+
+        private static float ToFloat(byte value) =>
+            value * (1f / 255f);
+        private static byte ToByte(float value) =>
+            (byte)(Math.Clamp(value, 0f, 1f) * 255f);
+        private static float Interpolate(float a, float b, float t) =>
+            a + (b - a) * t;
+        private static float Interpolate(float a, float b, float c, float d, float x, float y) =>
+            Interpolate(Interpolate(a, c, x), Interpolate(b, d, x), y);
         private static float InterpolateBarycentric(float a, float b, float c, float w0, float w1, float w2)
         {
-            return (a * w0) + (b * w1) + (c * w2);
+            return a * w0 + b * w1 + c * w2;
         }
 
         public static implicit operator Color(int value) => new Color(value);
@@ -140,7 +170,7 @@ namespace Fig
     public static class ColorExtensions
     {
         public static Color NextColor(this Random random) =>
-            random.Next() | (0xFF << 24);
+            random.Next() | 0xFF << 24;
         public static Color NextColorA(this Random random)
         {
             var bytes = new byte[4];

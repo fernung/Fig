@@ -1,4 +1,6 @@
-﻿namespace Fig.Decoders
+﻿using Fig.Graphics;
+
+namespace Fig.Graphics.Decoders
 {
     public interface IDecoder
     {
